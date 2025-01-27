@@ -1,23 +1,24 @@
-## Exercise 1 - Generate a key pair and encrypt/decrypt data.
+## Exercise 1 - Generate a key pair, encrypt/decrypt/sign data.
 ![By Software:OpenSSL contributorsScreenshot:VulcanSphere - Self-taken; derivative work, Public Domain, https://commons.wikimedia.org/w/index.php?curid=125198571](UEFI_Secure_Boot_DB_certificate.png) 
 
-This first exercise will illustrate the basics of using OpenSSL to generate a private-public key pair. [OpenSSL](https://en.wikipedia.org/wiki/OpenSSL) is a software library for applications that provide secure communications over computer networks against eavesdropping, and identify the party at the other end. It is widely used by Internet servers, including the majority of HTTPS websites. 
+This first exercise will illustrate the basics of using OpenSSL to generate a private-public key pair. [OpenSSL](https://en.wikipedia.org/wiki/OpenSSL) is an open source cryptographic toolkit that facilitates secure communications between endpoints on a network. It is widely used by Internet servers, including the majority of HTTPS websites. 
 
 ### Goals
-- Understand the process of creating a certificate using OpenSSL or similar
-- Understand some of the contents inside a certificate 
-- Be able to manipulate a certificate using the CLI
+- Understand the process of creating a public-private key pair using OpenSSL or similar
+- Understand some of the contents inside public-private keys
+- Be able to manipulate public-private keys using the CLI
+- Encode and sign data using public-private keys
 
 
 ### Instructions
-
+0. Ensure you are in the [Task 1 directory](.) by using `cd` or your OS' equivalent command to navigate there. 
 1. Start by generating a Private Key with the following command:
 
     ```openssl genrsa -out private.key 2048```
 
     This will generate a private key in the current directory by using the [RSA](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) algorithm - a relatively slow algorithm that relies on prime number factorisation for security. 
 
-    Note that the two provided arguments above refer to the filename of the private key, and the key length measured in bits - in the case above, 2048 bits. 
+    Note that the two provided arguments above refer to the filename of the private key, and the key length measured in bits - in the case above, 2048 bits. More bits means more resiliency against attacks!
 
 2. Inspect the private key by executing 
     ```cat private.key```.
@@ -30,7 +31,7 @@ This first exercise will illustrate the basics of using OpenSSL to generate a pr
 
     <details> 
     <summary>Knowledge checkpoint</summary>
-    These are the mathematical parameters used in the creation of the private key, stored in hexadecimal format. As mentioned, RSA uses prime numbers to generate private keys - you can notice terms related to number theory, such as modulus or exponent. More obviously, first prime and second prime indicate the prime numbers used in generating the private key. More info can be found in the RFC for RSA <a href=https://www.rfc-editor.org/rfc/rfc3447#appendix-A.1.1>here</a>
+    These are the mathematical parameters used in the creation of the private key, stored in hexadecimal format. As mentioned, RSA uses prime numbers to generate private keys - you can notice terms related to number theory, such as modulus or exponent. More importantly, first prime and second prime indicate the prime numbers used in generating the private key - if these are leaked, then the security of the private key has been compromised. More info can be found in the RFC for RSA <a href=https://www.rfc-editor.org/rfc/rfc3447#appendix-A.1.1>here</a>
     </details>
 
 
@@ -43,10 +44,10 @@ This first exercise will illustrate the basics of using OpenSSL to generate a pr
     What do you observe?
         <details> 
         <summary>Knowledge checkpoint</summary>
-        The mathematical parameters in the decoded public key are a subset of the parameters of the private key, in particular the modulus and exponent. The basis of RSA is that of a one-way (trapdoor) function: Given just these two parameters, it is impossible to determine the other parameters present in the public key, such as the prime numbers used. Hence why it is completely fine to include these in the public key.  
+        The mathematical parameters in the decoded public key are a subset of the parameters of the private key, in particular the modulus and exponent. The basis of RSA is that of a one-way (trapdoor) function: Given the modulus and exponent, it is impossible to determine the other parameters present in the private key, such as the prime numbers. But given the prime numbers, it is trivial to calculate the modulus and exponent.
         </details>
 
-6. Finally, let's do something a bit more useful with these keys. 
+6. Now, let's do something a bit more useful with these keys - namely, encrypt some information, and then decrypt it.
     1. Start by editing the file [here](./message_to_be_encrypted.txt).
     2. Using the public key that was created earlier, encrypt the file above with the command ```openssl pkeyutl -encrypt -inkey public.key -pubin -in message_to_be_encrypted.txt -out encrypted_file.bin```
     This will produce a binary file as the output, containing the original message encrypted with the generated public key.
@@ -56,6 +57,17 @@ This first exercise will illustrate the basics of using OpenSSL to generate a pr
     - `hexdump -C encrypted_file.bin`
     4. Decrypt the file with your private key: ```openssl pkeyutl -decrypt -inkey private.key -in encrypted_file.bin -out decrypted_file.txt```
 
+7. For the last step, private and public key allow entities to verify their identity through signing. As a minimal example, an entity can sign a piece of data with its private key, and then any party can use the entity's public key to verify the signature. To put this to practise:
+    1. Run ```openssl dgst -sha256 -sign private.key -out /tmp/sign.sha256 message_to_be_encrypted.txt``` to sign the message modified earlier with your private key.
+    2. You'll notice that the output of the file is binary. The default output format of the OpenSSL signature is binary. When transmitting data over the internet, it is good practice to compress it; however, as we will verify the signature locally, we won't worry about that for now.
+    3. Run ```openssl dgst -sha256 -verify public.key -signature message_signed.sha256 message_to_be_encrypted.txt``` to verify the signed message against the original message, by using the public key.
+    4. If you wish, you can try 'corrupting' the signed message, by adding or removing a few characters and then running the verification command in step 3.   
+    
+    What do you think will happen?
+        <details> 
+        <summary>Knowledge checkpoint</summary>
+        Modifying the signed message causes the signature verification to fail - this shows that signing not only ensures authenticity, but also data integrity.  
+        </details>
 
 ## Extension task
 
