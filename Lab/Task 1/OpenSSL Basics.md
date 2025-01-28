@@ -1,7 +1,7 @@
-## Exercise 1 - Generate a key pair, encrypt/decrypt/sign data.
+## Task 1 - Generate a key pair, encrypt/decrypt/sign data.
 ![By Software:OpenSSL contributorsScreenshot:VulcanSphere - Self-taken; derivative work, Public Domain, https://commons.wikimedia.org/w/index.php?curid=125198571](UEFI_Secure_Boot_DB_certificate.png) 
 
-This first exercise will illustrate the basics of using OpenSSL to generate a private-public key pair. [OpenSSL](https://en.wikipedia.org/wiki/OpenSSL) is an open source cryptographic toolkit that facilitates secure communications between endpoints on a network. It is widely used by Internet servers, including the majority of HTTPS websites. 
+This first task will illustrate the basics of using OpenSSL to generate a private-public key pair. [OpenSSL](https://en.wikipedia.org/wiki/OpenSSL) is an open source cryptographic toolkit that facilitates secure communications between endpoints on a network. It is widely used by Internet servers, including the majority of HTTPS websites. 
 
 ### Goals
 - Understand the process of creating a public-private key pair using OpenSSL or similar
