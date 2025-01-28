@@ -21,7 +21,7 @@ In this exercise, we will look into generating a self-signed X.509 certificate v
    The command first generates the public key corresponding to `private.key`, then it bundles it up with the metadata you just entered into a CSR file. Note that the private key is not part of this bundle!
 
 3. At this point, we would usually submit the CSR to a Certificate Authority and wait for it to sign the certificate - however, for the purposes of this task, we will sign the certificate ourselves:
-```openssl x509 -req -in request.csr -signkey private.pem -out certificate.crt``` 
+```openssl x509 -req -in request.csr -signkey private.key    Po -out certificate.crt``` 
 
     Note that in a real world setting, this certificate would be rather useless - can you guess why? 
     <details> 
