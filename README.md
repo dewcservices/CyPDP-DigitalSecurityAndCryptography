@@ -2,6 +2,8 @@
 
 This lab has been designed to be OS-agnostic. Instructions for different operating systems can be found below.
 
+Be sure to have an local copy of this repo available before the workshop starts!
+
 ## OpenSSL
 ### Windows
 
