@@ -8,7 +8,7 @@
 # To access keychain on Macbook: lens -> Keychain access
 
 # Show off nginx config file
-code ./nginx.conf
+code nginx.conf
 
 # To restart nginx:
 brew services restart nginx
