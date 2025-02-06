@@ -4,6 +4,8 @@ This lab has been designed to be OS-agnostic. Instructions for different operati
 
 Be sure to have an local copy of this repo available before the workshop starts!
 
+The slides that will be presented on the day can be found [here](./CyberPDF.pptx).
+
 ## OpenSSL
 ### Windows
 
