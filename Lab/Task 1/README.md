@@ -1,11 +1,11 @@
 ## Task 1 - Generate a key pair, encrypt/decrypt/sign data.
 ![By Software:OpenSSL contributorsScreenshot:VulcanSphere - Self-taken; derivative work, Public Domain, https://commons.wikimedia.org/w/index.php?curid=125198571](UEFI_Secure_Boot_DB_certificate.png) 
 
-This first task will illustrate the basics of using OpenSSL to generate a private-public key pair. [OpenSSL](https://en.wikipedia.org/wiki/OpenSSL) is an open source cryptographic toolkit that facilitates secure communications between endpoints on a network. It is widely used by Internet servers, including the majority of HTTPS websites. 
+This first task will illustrate the basics of using OpenSSL to generate a public-private key pair. [OpenSSL](https://en.wikipedia.org/wiki/OpenSSL) is an open source cryptographic toolkit that facilitates secure communications between endpoints on a network. It is widely used by Internet servers, including the majority of HTTPS websites. 
 
 ### Goals
-- Understand the process of creating a public-private key pair using OpenSSL or similar
-- Understand some of the contents inside public-private keys
+- Understand the process of creating a public-private key pair using OpenSSL
+- Understand how to interpret some of the contents inside public-private keys
 - Be able to manipulate public-private keys using the CLI
 - Encode and sign data using public-private keys
 
@@ -18,7 +18,7 @@ This first task will illustrate the basics of using OpenSSL to generate a privat
 
     This will generate a private key in the current directory by using the [RSA](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) algorithm - a relatively slow algorithm that relies on prime number factorisation for security. 
 
-    Note that the two provided arguments above refer to the filename of the private key, and the key length measured in bits - in the case above, 2048 bits. More bits means more resiliency against attacks!
+    Note that the two provided arguments above refer to the filename of the private key, and the key length measured in bits - namely, 2048 bits. More bits means more resiliency against attacks!
 
 2. Inspect the private key by executing 
     ```cat private.key```.
@@ -31,7 +31,7 @@ This first task will illustrate the basics of using OpenSSL to generate a privat
 
     <details> 
     <summary>Knowledge checkpoint</summary>
-    These are the mathematical parameters used in the creation of the private key, stored in hexadecimal format. As mentioned, RSA uses prime numbers to generate private keys - you can notice terms related to number theory, such as modulus or exponent. More importantly, first prime and second prime indicate the prime numbers used in generating the private key - if these are leaked, then the security of the private key has been compromised. More info can be found in the RFC for RSA <a href=https://www.rfc-editor.org/rfc/rfc3447#appendix-A.1.1>here</a>
+    These are the mathematical parameters used in the creation of the private key, stored in hexadecimal format. As mentioned, RSA uses prime numbers to generate private keys - you can notice terms related to number theory, such as modulus or exponent. More importantly, first prime and second prime indicate the prime numbers used in generating the private key - if these are leaked, then the security of the private key has been compromised. If you're interested in learning more, you can refer to the formal RSA RFC <a href=https://www.rfc-editor.org/rfc/rfc3447#appendix-A.1.1>here</a>
     </details>
 
 
@@ -48,56 +48,24 @@ This first task will illustrate the basics of using OpenSSL to generate a privat
         </details>
 
 6. Now, let's do something a bit more useful with these keys - namely, encrypt some information, and then decrypt it.
-    1. Start by editing the file [here](./message_to_be_encrypted.txt).
+    1. Start by editing the file [here](./message_to_be_encrypted.txt). Replace the contents with something else.
     2. Using the public key that was created earlier, encrypt the file above with the command ```openssl pkeyutl -encrypt -inkey public.key -pubin -in message_to_be_encrypted.txt -out encrypted_file.bin```
-    This will produce a binary file as the output, containing the original message encrypted with the generated public key.
+    This will produce a binary file as the output, containing the original message encrypted with the public key.
     3. Verify that the message is indeed encrypted by running any of the following commands, depending on your OS:
     - `cat encrypted_file.bin`
     - `xxd -b encrypted_file.bin`
     - `hexdump -C encrypted_file.bin`
     4. Decrypt the file with your private key: ```openssl pkeyutl -decrypt -inkey private.key -in encrypted_file.bin -out decrypted_file.txt```
+    5. Inspect the contents - they should match the original message. 
 
-7. For the last step, private and public key allow entities to verify their identity through signing. As a minimal example, an entity can sign a piece of data with its private key, and then any party can use the entity's public key to verify the signature. To put this to practise:
+7. As mentioned, private and public key allow entities to verify their identity through signing. As a minimal example, an entity can sign a piece of data with its private key, and then any party can use the entity's public key to verify the signature. To put this to practice:
     1. Run ```openssl dgst -sha256 -sign private.key -out /tmp/sign.sha256 message_to_be_encrypted.txt``` to sign the message modified earlier with your private key.
     2. You'll notice that the output of the file is binary. The default output format of the OpenSSL signature is binary. When transmitting data over the internet, it is good practice to compress it; however, as we will verify the signature locally, we won't worry about that for now.
     3. Run ```openssl dgst -sha256 -verify public.key -signature message_signed.sha256 message_to_be_encrypted.txt``` to verify the signed message against the original message, by using the public key.
-    4. If you wish, you can try 'corrupting' the signed message, by adding or removing a few characters and then running the verification command in step 3.   
+    4. Try changing the signed message, by adding or removing a few characters and then running the verification command as per step 3. For example: ```echo 1234 >> /tmp/sign.sha256```  
     
-    What do you think will happen?
+    What do you think will happen when you try to verify the signature?
         <details> 
         <summary>Knowledge checkpoint</summary>
         Modifying the signed message causes the signature verification to fail - this shows that signing not only ensures authenticity, but also data integrity.  
         </details>
-
-## Extension task
-
-In the folder [corrupted](./corrupted/), a message has been hidden in plain sight, containing an important reminder for today. Your task is to decipher the message.
-
-Unfortunately, it is not as easy as it seems - it is not obvious which key was used to encrypt the file! There are 4 potential candidates present, and to top it off, some of the files have been corrupted, with strings being replaced with question marks: `???` Your task boils down to the following subtasks:
-
-1. Identify the correct key 
-2. Fix any data corruption
-3. Decode the encrypted file.
-
-
-Use the hints below for help. Good luck!
-
-<details> 
-<summary>Hint 1</summary>
-The only knowledge necessary to achieve this task is what has been covered in previous exercises. If something seems unfamiliar, don't dwell on it too much.
-</details>
-
-<details> 
-<summary>Hint 2</summary>
-It may be useful to refer to the certificates you generated previously, and compare them with the corrupt ones.
-</details>
-
-<details> 
-<summary>Hint 3</summary>
-You're almost certainly looking for a private key. Which candidate resembles an RSA private key file the most?
-</details>
-
-<details> 
-<summary>Solution</summary>
-1.key is the correct file; in addition to that, the ??? need to be replaced with the word PRIVATE. Following that, simply execute the decryption command as illustrated above to get the decrypted file.
-</details>
