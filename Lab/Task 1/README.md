@@ -62,7 +62,7 @@ This first task will illustrate the basics of using OpenSSL to generate a public
     1. Run ```openssl dgst -sha256 -sign private.key -out /tmp/sign.sha256 message_to_be_encrypted.txt``` to sign the message modified earlier with your private key.
     2. You'll notice that the output of the file is binary. The default output format of the OpenSSL signature is binary. When transmitting data over the internet, it is good practice to compress it; however, as we will verify the signature locally, we won't worry about that for now.
     3. Run ```openssl dgst -sha256 -verify public.key -signature /tmp/sign.sha256 message_to_be_encrypted.txt``` to verify the signed message against the original message, by using the public key.
-    4. Try changing the signed message, by removing a few characters from the middle of the file; then, running the verification command as per step 3.  
+    4. Try changing the signed message, by removing a few characters from the middle of the file; then, running the verification command as per step 3. As an example: ```vim /tmp/sign.sha256```.  
     
     What do you think will happen when you try to verify the signature?
         <details> 
